@@ -53,14 +53,23 @@ exports.deleteEmp = async (req, res) => {
 
 exports.updateEmp = async (req, res) => {
     try {
-        const { id } = req.params;
-        const { name, salary } = req.body;
-        if (!name || !salary) {
+        const { id } = req.params; //destructuring -> direct access to id
+        const { name, salary } = req.body; //fields we want to update
+
+        if (!name || !salary) { //input validations
             res.status(400).json({ message: "all fields are required" });
-            return;
+            return; //stops function execution to prevent multiple ressponses
         }
-        const updatedEmp = await Emp.findByIdAndUpdate(id, { name, salary }, { new: true, runValidators: true });
-        if (!updatedEmp) {
+        
+        const updatedEmp = await Emp.findByIdAndUpdate(
+            id,
+            { name, salary }, //new data
+            { new: true, runValidators: true }
+            // new:true -> returns the updated document instead of the old one
+            // runValidators:true -> enforces schema validation rules during update
+        );
+
+        if (!updatedEmp) { //if id not exits in db return null
             res.status(404).json({ message: "Emp not found" });
             return;
         }
