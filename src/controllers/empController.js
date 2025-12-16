@@ -14,16 +14,16 @@ const Emp = require('../models/empModel');
 exports.addEmp = async (req, res) => {
     try {
         let result;
-    if (Array.isArray(req.body)) {
-        result = await Emp.insertMany(req.body);
-    }
-    else {
-        const newEmp = new Emp(req.body);
-        result = await newEmp.save();
-    }
-    res.status(201).json({ message: "New user added..." }, result);
+        if (Array.isArray(req.body)) {
+            result = await Emp.insertMany(req.body);
+        }
+        else {
+            const newEmp = new Emp(req.body);
+            result = await newEmp.save();
+        }
+        res.status(201).json({ message: "New user added..." }, result);
     } catch (error) {
-        res.status(500).json({message:error.message});
+        res.status(500).json({ message: error.message });
     }
 };
 
@@ -48,5 +48,24 @@ exports.deleteEmp = async (req, res) => {
     } catch (error) {
         // console.log(error);
         res.status(500).json({ message: "emp not deleted" })
+    }
+}
+
+exports.updateEmp = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, salary } = req.body;
+        if (!name || !salary) {
+            res.status(400).json({ message: "all fields are required" });
+            return;
+        }
+        const updatedEmp = await Emp.findByIdAndUpdate(id, { name, salary }, { new: true, runValidators: true });
+        if (!updatedEmp) {
+            res.status(404).json({ message: "Emp not found" });
+            return;
+        }
+        res.status(200).json({ message: "emp updated successfully", updatedEmp });
+    } catch (error) {
+        res.status(500).json({ message: error.message });
     }
 }
